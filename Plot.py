@@ -66,7 +66,7 @@ def plot_data(df):
 
 if __name__ == "__main__":
 
-    # Parse the file
+    # Parse the config file
     yaml_file_path = "config.yaml"
     config = parse_yaml(yaml_file_path)
 
@@ -77,5 +77,3 @@ if __name__ == "__main__":
     else:
         print("No data available to plot.")
 
-    # plt.tight_layout()
-    # plt.show()
