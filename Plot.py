@@ -1,32 +1,79 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import yaml
 
-# Load the CSV file
-file_path = "new_runs\position_data_final_deg60_gravity_test_dens019375_98_freq35_PW0_PP1E4_PPS4_PPR3_PWS83_PWroll5_PWAD11E9_smallramp_amplitude_avg.csv"
-df = pd.read_csv(file_path)
 
-# Filter for specific particle IDs:
-selected_ids =  range(df['# particleId'].min(),df['# particleId'].max()+1)
-filtered_df = df[df['id'].isin(selected_ids)]
+def parse_yaml(file_path):
+    """
+    Parses a YAML file and returns its content as a Python dictionary.
+    
+    :param file_path: Path to the YAML file.
+    :return: Parsed content as a dictionary.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            data = yaml.safe_load(file)
+        return data
+    except yaml.YAMLError as e:
+        print(f"Error parsing YAML file: {e}")
+        return None
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return None
 
-# Create subplots for position and velocity
-fig, axes = plt.subplots(2, 1, figsize=(12, 12))
 
-# Plot pos_x vs time
-sns.lineplot(data=filtered_df, x='time', y='dif_x', hue='# particleId', marker='o', ax=axes[0])
-axes[0].set_title('Position in X-direction vs Time for Particles')
-axes[0].set_xlabel('Time (s)')
-axes[0].set_ylabel('Position in X-direction (m)')
-axes[0].grid(True)
-axes[0].set_xlim(0, 2)  
+def read_csv(file_path):
+    """
+    Reads a CSV file and returns a DataFrame.
+    
+    :param file_path: Path to the CSV file.
+    :return: DataFrame containing the CSV data.
+    """
+    try:
+        df = pd.read_csv(file_path)
+        return df
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return None
+    except pd.errors.EmptyDataError:
+        print(f"No data found in the file: {file_path}")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred while reading the CSV file: {e}")
+        return None
 
-# Plot vel_x vs time
-#sns.lineplot(data=filtered_df, x='time', y='vel_x', hue='id', marker='o', ax=axes[1])
-#axes[1].set_title('Velocity in X-direction vs Time for Particles')
-#axes[1].set_xlabel('Time (s)')
-#axes[1].set_ylabel('Velocity in X-direction (m/s)')
-#axes[1].grid(True)
-#axes[1].set_xlim(0, 2)  
-#plt.tight_layout()
-#plt.show()
+def plot_data(df):
+    """
+    Plots the data from the DataFrame.
+    
+    :param df: DataFrame containing the data to plot.
+    """
+    if df is not None:
+        sns.set(style="whitegrid")
+        plt.figure(figsize=(12, 6))
+        sns.lineplot(data=df, x='time', y='dif_x', hue='# particleId', marker='o')
+        plt.title('Position in X-direction vs Time for Particles')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Position in X-direction (m)')
+        plt.grid(True)
+        plt.show()
+    else:
+        print("No data to plot.")
+
+if __name__ == "__main__":
+
+    # Parse the config file
+    yaml_file_path = "config.yaml"
+    config = parse_yaml(yaml_file_path)
+
+    file = read_csv(config['file'])
+    if file is not None:
+        df = pd.DataFrame(file)
+        plot_data(df)
+    else:
+        print("No data available to plot.")
+
